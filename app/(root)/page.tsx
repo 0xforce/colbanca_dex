@@ -3,7 +3,12 @@
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
 import TOKEN_ABI from '../../constants/abis/Token.json';
+import { loadToken } from '../globalRedux/interactions'
 import configJson from '../../config.json';
+
+import { useAppDispatch, useAppSelector } from '../globalRedux/hooks';
+import {setProvider, setChainId, setAccount} from '../globalRedux/features/connectionSlice';
+import { setCBNK } from '../globalRedux/features/tokensSlice';
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -18,31 +23,33 @@ interface ChainConfig {
 const config: Record<string, ChainConfig> = configJson as Record<string, ChainConfig>;
 
 export default function Home() {
+  const provider = useAppSelector(state => state.connectionReducer.provider)
+  const chainId = useAppSelector(state => state.connectionReducer.chainId)
+  const dispatch = useAppDispatch()
 
   const loadBlockchainData = async () => {
     try {
       // Ensure that MetaMask or a similar provider is available
       if (window.ethereum) {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        console.log(accounts[0]);
+        const account = ethers.utils.getAddress(accounts[0])
+        dispatch(setAccount(account))
 
         //Connect ethers to blockchain
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        let { chainId } = await provider.getNetwork()
-        console.log(chainId)
-        chainId = typeof chainId === 'number' ? chainId : parseInt(chainId, 10);
+        const loadProvider = new ethers.providers.Web3Provider(window.ethereum);
+        dispatch(setProvider(loadProvider))
 
-        // Token Smart Contract
-        const token = new ethers.Contract(config[chainId].CBNK.address, TOKEN_ABI, provider)
-        console.log(token.address)
-        const symbol = await token.symbol()
-        console.log(symbol)
+        const { chainId } = await loadProvider.getNetwork();
+        dispatch(setChainId(chainId))
+
+        const token = await loadToken(loadProvider, config[chainId].CBNK.address, TOKEN_ABI )
+        dispatch(setCBNK(token))
 
       } else {
-        console.error('Ethereum provider not detected. Please install MetaMask or a similar wallet.');
+        console.error('Provider not detected. Please install MetaMask or a similar wallet.');
       }
     } catch (error) {
-      console.error('Error requesting Ethereum accounts:', error);
+      console.error('Error requesting data:', error);
     }
   }
 
