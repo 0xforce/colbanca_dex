@@ -3,11 +3,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import connectionReducer from './features/connectionSlice'
 import tokensReducer from './features/tokensSlice'
+import exchangeReducer from './features/exchangeSlice'
 
 export const store = configureStore({
     reducer: {
         connectionReducer,
-        tokensReducer
+        tokensReducer,
+        exchangeReducer,
     },
     devTools: true,
     middleware: (getDefaultMiddleware) =>

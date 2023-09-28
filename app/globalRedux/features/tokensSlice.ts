@@ -1,30 +1,36 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ethers } from 'ethers';
 
 // Define the state type
 interface TokensState {
-  CBNKToken: {
-    loaded: boolean;
-    contract: string | null;
-    symbol: string | null;
+  Pair1: {
+    token_1_loaded: boolean;
+    token_2_loaded: boolean;
+    contracts: any[];
+    symbols: string[];
   };
 }
 
 const initialState: TokensState = {
-    CBNKToken: { loaded: false, contract: null, symbol: null },
+    Pair1: { token_1_loaded: false, token_2_loaded: false, contracts: [], symbols: [] },
 };
 
 const tokensSlice = createSlice({
   name: 'tokens',
   initialState,
   reducers: {
-    setCBNK: (state, action: PayloadAction<{ loaded: boolean; token: any; symbol: string }>) => {
-      state.CBNKToken.loaded = action.payload.loaded;
-      state.CBNKToken.contract = action.payload.token;
-      state.CBNKToken.symbol = action.payload.symbol;
+    setPair1: (state, action: PayloadAction<{ token_1_loaded: boolean; token_2_loaded: boolean; token: ethers.Contract; symbol: string; token2: ethers.Contract; symbol2: string }>) => {
+      state.Pair1.token_1_loaded = action.payload.token_1_loaded;
+      state.Pair1.contracts = [...state.Pair1.contracts, action.payload.token];
+      state.Pair1.symbols = [...state.Pair1.symbols, action.payload.symbol];
+
+      state.Pair1.token_2_loaded = action.payload.token_2_loaded;
+      state.Pair1.contracts = [...state.Pair1.contracts, action.payload.token2];
+      state.Pair1.symbols = [...state.Pair1.symbols, action.payload.symbol2];
     },
   },
 });
 
-export const { setCBNK } = tokensSlice.actions;
+export const { setPair1 } = tokensSlice.actions;
 
 export default tokensSlice.reducer;

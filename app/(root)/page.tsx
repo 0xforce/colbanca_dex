@@ -2,13 +2,13 @@
 
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
-import TOKEN_ABI from '../../constants/abis/Token.json';
-import { loadToken } from '../globalRedux/interactions'
+import { loadAccount, loadTokens, loadExchange } from '../globalRedux/interactions'
 import configJson from '../../config.json';
 
 import { useAppDispatch, useAppSelector } from '../globalRedux/hooks';
 import {setProvider, setChainId, setAccount} from '../globalRedux/features/connectionSlice';
-import { setCBNK } from '../globalRedux/features/tokensSlice';
+import { setPair1 } from '../globalRedux/features/tokensSlice';
+import { setExchange } from '../globalRedux/features/exchangeSlice';
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -31,19 +31,29 @@ export default function Home() {
     try {
       // Ensure that MetaMask or a similar provider is available
       if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const account = ethers.utils.getAddress(accounts[0])
-        dispatch(setAccount(account))
-
+        
         //Connect ethers to blockchain
         const loadProvider = new ethers.providers.Web3Provider(window.ethereum);
         dispatch(setProvider(loadProvider))
+        
+        // Fetch current account and balance from Metamask
+        const account = await loadAccount(loadProvider);
+        dispatch(setAccount(account))
 
+        //Fetch current network's chainId
         const { chainId } = await loadProvider.getNetwork();
         dispatch(setChainId(chainId))
 
-        const token = await loadToken(loadProvider, config[chainId].CBNK.address, TOKEN_ABI )
-        dispatch(setCBNK(token))
+        // Load token smart contracts
+        const CBNK = config[chainId].CBNK
+        const mETH = config[chainId].mETH
+        const pair1 = await loadTokens(loadProvider, [CBNK.address, mETH.address])
+        dispatch(setPair1(pair1))
+
+        // Load exchange smart contract
+        const exchangeConfig = config[chainId].exchange;
+        const exchange = await loadExchange(loadProvider, exchangeConfig.address)
+        dispatch(setExchange(exchange))
 
       } else {
         console.error('Provider not detected. Please install MetaMask or a similar wallet.');
