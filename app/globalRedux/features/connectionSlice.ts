@@ -11,10 +11,10 @@ export const connectionSlice = createSlice({
     name: 'connection',
     initialState: {
         provider: null,
-        chainId: null,
+        chainId: '0',
         account: {
-            address: '0x...0000',
-            balance: '0'
+            address: '',
+            balance: ''
         },
     },
     reducers: {

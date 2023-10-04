@@ -2,13 +2,15 @@
 
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
-import { loadAccount, loadTokens, loadExchange } from '../globalRedux/interactions'
+import { loadTokens, loadExchange, loadAccount } from '../globalRedux/interactions'
 import configJson from '../../config.json';
 
 import { useAppDispatch, useAppSelector } from '../globalRedux/hooks';
 import {setProvider, setChainId, setAccount} from '../globalRedux/features/connectionSlice';
 import { setPair1 } from '../globalRedux/features/tokensSlice';
 import { setExchange } from '../globalRedux/features/exchangeSlice';
+
+import Navbar from '../../components/Navbar'
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -23,8 +25,6 @@ interface ChainConfig {
 const config: Record<string, ChainConfig> = configJson as Record<string, ChainConfig>;
 
 export default function Home() {
-  const provider = useAppSelector(state => state.connectionReducer.provider)
-  const chainId = useAppSelector(state => state.connectionReducer.chainId)
   const dispatch = useAppDispatch()
 
   const loadBlockchainData = async () => {
@@ -35,14 +35,21 @@ export default function Home() {
         //Connect ethers to blockchain
         const loadProvider = new ethers.providers.Web3Provider(window.ethereum);
         dispatch(setProvider(loadProvider))
-        
-        // Fetch current account and balance from Metamask
-        const account = await loadAccount(loadProvider);
-        dispatch(setAccount(account))
 
         //Fetch current network's chainId
         const { chainId } = await loadProvider.getNetwork();
         dispatch(setChainId(chainId))
+
+        // reload page when network changes
+        window.ethereum.on('chainChanged', () => {
+          window.location.reload()
+        })
+
+        // Fetch current account and balance from Metamask when changed
+        window.ethereum.on('accountsChanged', async () => {
+          const account = await loadAccount(loadProvider);
+          dispatch(setAccount(account))
+        })
 
         // Load token smart contracts
         const CBNK = config[chainId].CBNK
@@ -71,7 +78,7 @@ export default function Home() {
   return (
     <div>
 
-      {/* Navbar */}
+      <Navbar />
 
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
