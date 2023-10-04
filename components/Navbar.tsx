@@ -7,11 +7,10 @@ import { useAppSelector, useAppDispatch } from '@/app/globalRedux/hooks'
 import Blockies from 'react-blockies'
 
 import { loadAccount } from '@/app/globalRedux/interactions'
-import { setAccount, setChainId } from '@/app/globalRedux/features/connectionSlice'
+import { setAccount } from '@/app/globalRedux/features/connectionSlice'
 import { ethers } from 'ethers'
 
 import config from '../config.json'
-import { useEffect } from 'react'
 
 function Navbar() {
     const dispatch = useAppDispatch();

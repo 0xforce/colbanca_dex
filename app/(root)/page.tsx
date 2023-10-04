@@ -5,12 +5,13 @@ import { ethers } from 'ethers';
 import { loadTokens, loadExchange, loadAccount } from '../globalRedux/interactions'
 import configJson from '../../config.json';
 
-import { useAppDispatch, useAppSelector } from '../globalRedux/hooks';
+import { useAppDispatch } from '../globalRedux/hooks';
 import {setProvider, setChainId, setAccount} from '../globalRedux/features/connectionSlice';
-import { setPair1 } from '../globalRedux/features/tokensSlice';
+import { setPair } from '../globalRedux/features/tokensSlice';
 import { setExchange } from '../globalRedux/features/exchangeSlice';
 
 import Navbar from '../../components/Navbar'
+import Markets from '../../components/Markets'
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -54,8 +55,8 @@ export default function Home() {
         // Load token smart contracts
         const CBNK = config[chainId].CBNK
         const mETH = config[chainId].mETH
-        const pair1 = await loadTokens(loadProvider, [CBNK.address, mETH.address])
-        dispatch(setPair1(pair1))
+        const pair = await loadTokens(loadProvider, [CBNK.address, mETH.address])
+        dispatch(setPair(pair))
 
         // Load exchange smart contract
         const exchangeConfig = config[chainId].exchange;
@@ -83,7 +84,7 @@ export default function Home() {
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
 
-          {/* Markets */}
+          <Markets />
 
           {/* Balance */}
 
