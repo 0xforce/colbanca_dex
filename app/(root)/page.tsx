@@ -2,16 +2,17 @@
 
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
-import { loadTokens, loadExchange, loadAccount } from '../globalRedux/interactions'
+import { loadTokens, loadExchange, loadAccount, subscribeToEvents } from '../globalRedux/interactions'
 import configJson from '../../config.json';
 
-import { useAppDispatch } from '../globalRedux/hooks';
+import { useAppDispatch, useAppSelector } from '../globalRedux/hooks';
 import {setProvider, setChainId, setAccount} from '../globalRedux/features/connectionSlice';
 import { setPair } from '../globalRedux/features/tokensSlice';
 import { setExchange } from '../globalRedux/features/exchangeSlice';
 
 import Navbar from '../../components/Navbar'
 import Markets from '../../components/Markets'
+import Balance from '../../components/Balance'
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -27,6 +28,7 @@ const config: Record<string, ChainConfig> = configJson as Record<string, ChainCo
 
 export default function Home() {
   const dispatch = useAppDispatch()
+  const exchangeContract = useAppSelector(state => state.exchangeReducer.exchange.contract)
 
   const loadBlockchainData = async () => {
     try {
@@ -63,6 +65,11 @@ export default function Home() {
         const exchange = await loadExchange(loadProvider, exchangeConfig.address)
         dispatch(setExchange(exchange))
 
+        //Listen to events
+        if(exchangeContract){
+          subscribeToEvents(exchangeContract, dispatch)
+        }
+
       } else {
         console.error('Provider not detected. Please install MetaMask or a similar wallet.');
       }
@@ -86,7 +93,7 @@ export default function Home() {
 
           <Markets />
 
-          {/* Balance */}
+          <Balance />
 
           {/* Order */}
 

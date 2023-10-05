@@ -9,10 +9,12 @@ interface TokensState {
     contracts: any[];
     symbols: string[];
   };
+  balances: string[];
 }
 
 const initialState: TokensState = {
     Pair: { token_1_loaded: false, token_2_loaded: false, contracts: [], symbols: [] },
+    balances: ['0', '0']
 };
 
 const tokensSlice = createSlice({
@@ -27,9 +29,12 @@ const tokensSlice = createSlice({
       state.Pair.contracts = [action.payload.token, action.payload.token2];
       state.Pair.symbols = [action.payload.symbol, action.payload.symbol2];
     },
+    setTokensBalances: (state, action: PayloadAction<{ balance_token_1: string; balance_token_2: string }>) => {
+      state.balances = [action.payload.balance_token_1, action.payload.balance_token_2];
+    },
   },
 });
 
-export const { setPair } = tokensSlice.actions;
+export const { setPair, setTokensBalances } = tokensSlice.actions;
 
 export default tokensSlice.reducer;
