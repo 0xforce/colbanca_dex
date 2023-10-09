@@ -1,5 +1,6 @@
 "use client";
 
+import thunk from 'redux-thunk';
 import { configureStore } from '@reduxjs/toolkit'
 import connectionReducer from './features/connectionSlice'
 import tokensReducer from './features/tokensSlice'
@@ -15,7 +16,7 @@ export const store = configureStore({
     middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
+    }).concat(thunk),
 })
 
 export type RootState = ReturnType<typeof store.getState>;

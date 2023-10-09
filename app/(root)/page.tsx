@@ -8,7 +8,7 @@ import configJson from '../../config.json';
 import { useAppDispatch, useAppSelector } from '../globalRedux/hooks';
 import {setProvider, setChainId, setAccount} from '../globalRedux/features/connectionSlice';
 import { setPair } from '../globalRedux/features/tokensSlice';
-import { setExchange } from '../globalRedux/features/exchangeSlice';
+import { setExchange, setTransferSuccess } from '../globalRedux/features/exchangeSlice';
 
 import Navbar from '../../components/Navbar'
 import Markets from '../../components/Markets'
@@ -28,7 +28,6 @@ const config: Record<string, ChainConfig> = configJson as Record<string, ChainCo
 
 export default function Home() {
   const dispatch = useAppDispatch()
-  const exchangeContract = useAppSelector(state => state.exchangeReducer.exchange.contract)
 
   const loadBlockchainData = async () => {
     try {
@@ -62,12 +61,13 @@ export default function Home() {
 
         // Load exchange smart contract
         const exchangeConfig = config[chainId].exchange;
-        const exchange = await loadExchange(loadProvider, exchangeConfig.address)
-        dispatch(setExchange(exchange))
+        let data = await loadExchange(loadProvider, exchangeConfig.address)
+        dispatch(setExchange(data))
 
         //Listen to events
-        if(exchangeContract){
-          subscribeToEvents(exchangeContract, dispatch)
+        const {exchange} = await loadExchange(loadProvider, exchangeConfig.address)
+        if (exchange) {
+          await subscribeToEvents(exchange, dispatch);
         }
 
       } else {

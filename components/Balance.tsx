@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import dapp from '../public/assets/dapp.svg'
-import { useEffect, useState } from 'react'
+import eth from '../public/assets/eth.svg'
+import { useEffect, useState, useRef, RefObject } from 'react'
 import { ethers } from 'ethers'
 
 import { useAppSelector, useAppDispatch } from '@/app/globalRedux/hooks'
@@ -10,7 +11,9 @@ import { setTokensBalances } from '../app/globalRedux/features/tokensSlice'
 import { setExchangeBalances } from '../app/globalRedux/features/exchangeSlice'
 
 const Balance = () => {
+    const [isDeposit, setIsDeposit] = useState(true)
     const [token1TransferAmount, setToken1TransferAmount] = useState('0')
+    const [token2TransferAmount, setToken2TransferAmount] = useState('0')
 
     const dispatch = useAppDispatch();
 
@@ -26,28 +29,52 @@ const Balance = () => {
     const tokenBalances = useAppSelector(state => state.tokensReducer.balances); 
 
     const loadBalance = async () => {
-            const tokenBalances = await loadTokensBalances( tokens, account);
-            dispatch(setTokensBalances(tokenBalances));
-            console.log(tokenBalances)
-            const exchangeBalances = await loadExchangeBalances( exchange, tokens, account);
-            dispatch(setExchangeBalances(exchangeBalances));
-            console.log(exchangeBalances)
+        const tokenBalances = await loadTokensBalances( tokens, account);
+        dispatch(setTokensBalances(tokenBalances));
+        console.log(tokenBalances)
+        const exchangeBalances = await loadExchangeBalances( exchange, tokens, account);
+        dispatch(setExchangeBalances(exchangeBalances));
+        console.log(exchangeBalances)
+    }
+
+    const depositRef: RefObject<HTMLButtonElement>  = useRef(null)
+    const withdrawRef: RefObject<HTMLButtonElement> = useRef(null)
+
+    const tabHandler = (e: any) => {
+        if(depositRef.current && e.target.className !== depositRef.current.className) {
+            e.target.className = 'tab tab--active'
+            depositRef.current.className = 'tab'
+            setIsDeposit(false)
+        } else if (withdrawRef.current) {
+            e.target.className = 'tab tab--active'
+            withdrawRef.current.className = 'tab'
+            setIsDeposit(true)
+        }
     }
 
     const amountHandler = (e: any, token: ethers.Contract) => {
         if (token.address === tokens[0]?.address) {
             setToken1TransferAmount(e.target.value)
+        } else {
+            setToken2TransferAmount(e.target.value)
         }
     }
 
     const depositHandler = (e: any, token: ethers.Contract) => {
-        e.preventDefault()
-
-        if (provider && token.address === tokens[0]?.address) {
-            transferTokens(provider, exchange, 'Deposit', token, token1TransferAmount, dispatch)
-            setToken1TransferAmount('0')
+        e.preventDefault();
+      
+        if (provider) {
+          if (token.address === tokens[0]?.address) {
+            transferTokens(provider, exchange, 'Deposit', token, token1TransferAmount, dispatch);
+            setToken1TransferAmount('0');
+          } else {
+            transferTokens(provider, exchange, 'Deposit', token, token2TransferAmount, dispatch);
+            setToken2TransferAmount('0');
+          }
+        } else {
+          console.error('Provider is null. Cannot perform deposit.');
         }
-    }
+    };
 
     useEffect(() => {
         if (exchange && account && tokens && tokens.length >= 2 && tokens[0]?.address && tokens[1]?.address) {
@@ -61,8 +88,8 @@ const Balance = () => {
         <div className='component__header flex-between'>
           <h2>Balance</h2>
           <div className='tabs'>
-            <button className='tab tab--active'>Deposit</button>
-            <button className='tab'>Withdraw</button>
+            <button onClick={tabHandler} ref={depositRef} className='tab tab--active'>Deposit</button>
+            <button onClick={tabHandler} ref={withdrawRef} className='tab'>Withdraw</button>
           </div>
         </div>
   
@@ -86,7 +113,7 @@ const Balance = () => {
             />
   
             <button className='button' type='submit'>
-              <span>Deposit</span>
+                {isDeposit ? (<span>Deposit</span>) : (<span>Withdraw</span>)}
             </button>
           </form>
         </div>
@@ -97,15 +124,23 @@ const Balance = () => {
   
         <div className='exchange__transfers--form'>
           <div className='flex-between'>
-  
+            <p><small>Token</small><br /><Image src={eth} alt='Token Logo'/>{symbols && symbols[1]}</p>
+            <p><small>Wallet</small><br />{tokenBalances && tokenBalances[1]}</p>
+            <p><small>Exchange</small><br />{exchangeBalances && exchangeBalances[1]}</p>
           </div>
   
-          <form>
+          <form onSubmit={(e) => depositHandler(e, tokens[1])}>
             <label htmlFor="token1"></label>
-            <input type="text" id='token1' placeholder='0.0000'/>
+            <input 
+                type="text" 
+                id='token1' 
+                placeholder='0.0000'
+                value={token2TransferAmount === '0' ? '' : token2TransferAmount}
+                onChange={(e) => amountHandler(e, tokens[1])} 
+            />
   
             <button className='button' type='submit'>
-              <span></span>
+                {isDeposit ? (<span>Deposit</span>) : (<span>Withdraw</span>)}
             </button>
           </form>
         </div>

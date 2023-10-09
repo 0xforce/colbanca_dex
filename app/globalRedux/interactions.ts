@@ -57,11 +57,18 @@ export const loadExchange = async (
     return {exchange, loaded};
 };
 
-export const subscribeToEvents = (exchange: ethers.Contract, dispatch: any) => {
+export const subscribeToEvents = (exchange: ethers.Contract, dispatch: any): void => {
   exchange.on('Deposit', (token, user, amount, balance, event) => {
-    dispatch(setTransferSuccess(event))
-  })
+    // Dispatch the action with the event payload
+    dispatch(setTransferSuccess(event));
+  });
+
+  // Handle errors, if necessary
+  exchange.on('error', (error) => {
+    console.error('Error in event listener:', error);
+  });
 }
+
 
 // Load user Balances (wallet & Exchange Balances)
 
