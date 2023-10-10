@@ -12,9 +12,14 @@ interface ExchangeState {
     transactionType: string;
     isPending: boolean | null;
     isSuccessful: boolean | null;
+    isError?: boolean | null;
   };
   transferInProgress: boolean;
-  isError?: boolean | null;
+  allOrders: {
+    data: any[];
+  };
+  index: number;
+  data: any[];
   events: any[]
 }
 
@@ -23,6 +28,11 @@ const initialState: ExchangeState = {
     balances: ['0', '0'],
     transaction: { transactionType: '', isPending: null, isSuccessful: null},
     transferInProgress: true,
+    allOrders: {
+      data: []
+    },
+    index: 0,
+    data: [],
     events: []
 };
 
@@ -47,13 +57,31 @@ const exchangeSlice = createSlice({
       state.events = [action.payload, ...state.events];
     },
     transferFail: (state) => {
-      state.transaction = {transactionType: 'Transfer', isPending: false, isSuccessful: false};
+      state.transaction = {transactionType: 'Transfer', isPending: false, isSuccessful: false, isError: true};
       state.transferInProgress = false;
-      state.isError = true;
     },
+    setOrderRequest: (state) => {
+      state.transaction ={transactionType: 'New Order', isPending: true, isSuccessful: false}
+    },
+    setOrderSuccess: (state, action) => {
+      // Prevent duplicate orders
+      state.index = state.allOrders.data.findIndex(order => order.id === action.payload.orderId)
+
+      if(state.index === -1) {
+        state.data = [...state.allOrders.data, action.payload.args]
+      } else {
+        state.data = state.allOrders.data
+      }
+      state.allOrders = {...state.allOrders, data: state.data }
+      state.transaction = {transactionType: 'New Order', isPending: false, isSuccessful: true};
+      state.events = [action.payload, ...state.events];
+    },
+    setOrderFail: (state) => {
+      state.transaction = {transactionType: 'New Order', isPending: false, isSuccessful: false, isError: true};
+    }
   },
 });
 
-export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail } = exchangeSlice.actions;
+export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail } = exchangeSlice.actions;
 
 export default exchangeSlice.reducer;

@@ -13,6 +13,7 @@ import { setExchange, setTransferSuccess } from '../globalRedux/features/exchang
 import Navbar from '../../components/Navbar'
 import Markets from '../../components/Markets'
 import Balance from '../../components/Balance'
+import Order from '../../components/Order'
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -95,7 +96,7 @@ export default function Home() {
 
           <Balance />
 
-          {/* Order */}
+          <Order />
 
         </section>
         <section className='exchange__section--right grid'>

@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
 import TOKEN_ABI from '../../constants/abis/Token.json';
 import EXCHANGE_ABI from '../../constants/abis/Exchange.json';
+import { Dispatch } from '@reduxjs/toolkit'
 
-import { setTransferRequest, setTransferSuccess, transferFail } from './features/exchangeSlice';
+import { setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail } from './features/exchangeSlice';
 
 type LoadTokenResult = {
   token: any;
@@ -57,7 +58,7 @@ export const loadExchange = async (
     return {exchange, loaded};
 };
 
-export const subscribeToEvents = (exchange: ethers.Contract, dispatch: any): void => {
+export const subscribeToEvents = (exchange: ethers.Contract, dispatch: Dispatch): void => {
   exchange.on('Deposit', (token, user, amount, balance, event) => {
     // Dispatch the action with the event payload
     dispatch(setTransferSuccess(event));
@@ -67,6 +68,10 @@ export const subscribeToEvents = (exchange: ethers.Contract, dispatch: any): voi
     // Dispatch the action with the event payload
     dispatch(setTransferSuccess(event));
   });
+
+  exchange.on('Order', (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
+    dispatch(setOrderSuccess(event))
+  })
 
   // Handle errors, if necessary
   exchange.on('error', (error) => {
@@ -95,7 +100,7 @@ export const loadExchangeBalances = async (exchange: ethers.Contract, tokens: et
 ///---------------------------------------------------------------------------------------
 /// Transfer tokens
 
-export const transferTokens = async (provider: ethers.providers.JsonRpcProvider, exchange: ethers.Contract, transferType: string, token: ethers.Contract, amount: string, dispatch: any) => {
+export const transferTokens = async (provider: ethers.providers.JsonRpcProvider, exchange: ethers.Contract, transferType: string, token: ethers.Contract, amount: string, dispatch: Dispatch) => {
   let transaction
   dispatch(setTransferRequest())
 
@@ -115,5 +120,43 @@ export const transferTokens = async (provider: ethers.providers.JsonRpcProvider,
     
   } catch (error) {
     dispatch(transferFail())
+  }
+}
+
+// Orders (Buy & Sell)
+
+export const makeBuyOrder = async (provider: ethers.providers.JsonRpcProvider, exchange: ethers.Contract, tokens: ethers.Contract[], order: any, dispatch: Dispatch) => {
+  const tokenGet = tokens[0].address
+  const amountGet = ethers.utils.parseUnits(order.amount, 18)
+  const tokenGive = tokens[1].address
+  const amountGive = ethers.utils.parseUnits((order.amount * order.price).toString(), 18)
+
+  dispatch(setOrderRequest())
+
+  try {
+    const signer = await provider.getSigner()
+    const transaction = await exchange.connect(signer).makeOrder(tokenGet, amountGet, tokenGive, amountGive)
+    await transaction.wait()
+    
+  } catch (error) {
+    dispatch(setOrderFail())
+  }
+}
+
+export const makeSellOrder = async (provider: ethers.providers.JsonRpcProvider, exchange: ethers.Contract, tokens: ethers.Contract[], order: any, dispatch: Dispatch) => {
+  const tokenGet = tokens[1].address
+  const amountGet = ethers.utils.parseUnits((order.amount * order.price).toString(), 18)
+  const tokenGive = tokens[0].address
+  const amountGive = ethers.utils.parseUnits(order.amount, 18)
+
+  dispatch(setOrderRequest())
+
+  try {
+    const signer = await provider.getSigner()
+    const transaction = await exchange.connect(signer).makeOrder(tokenGet, amountGet, tokenGive, amountGive)
+    await transaction.wait()
+    
+  } catch (error) {
+    dispatch(setOrderFail())
   }
 }
