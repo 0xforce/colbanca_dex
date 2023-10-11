@@ -16,6 +16,15 @@ interface ExchangeState {
   };
   transferInProgress: boolean;
   allOrders: {
+    loaded: boolean;
+    data: any[];
+  };
+  cancelledOrders: {
+    loaded: boolean;
+    data: any[];
+  };
+  filledOrders: {
+    loaded: boolean;
     data: any[];
   };
   index: number;
@@ -29,6 +38,15 @@ const initialState: ExchangeState = {
     transaction: { transactionType: '', isPending: null, isSuccessful: null},
     transferInProgress: true,
     allOrders: {
+      loaded: false, 
+      data: []
+    },
+    cancelledOrders: {
+      loaded: false, 
+      data: []
+    },
+    filledOrders: {
+      loaded: false, 
       data: []
     },
     index: 0,
@@ -65,7 +83,7 @@ const exchangeSlice = createSlice({
     },
     setOrderSuccess: (state, action) => {
       // Prevent duplicate orders
-      state.index = state.allOrders.data.findIndex(order => order.id === action.payload.orderId)
+      state.index = state.allOrders.data.findIndex(order => order.id.toString() === action.payload.orderId?.toString())
 
       if(state.index === -1) {
         state.data = [...state.allOrders.data, action.payload.args]
@@ -78,10 +96,19 @@ const exchangeSlice = createSlice({
     },
     setOrderFail: (state) => {
       state.transaction = {transactionType: 'New Order', isPending: false, isSuccessful: false, isError: true};
-    }
+    },
+    allOrdersLoaded: (state, action) => {
+      state.allOrders = {loaded: true, data: action.payload}
+    },
+    cancelledOrdersLoaded: (state, action) => {
+      state.cancelledOrders = {loaded: true, data: action.payload}
+    },
+    filledOrdersLoaded: (state, action) => {
+      state.filledOrders = {loaded: true, data: action.payload}
+    },
   },
 });
 
-export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail } = exchangeSlice.actions;
+export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded } = exchangeSlice.actions;
 
 export default exchangeSlice.reducer;

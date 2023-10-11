@@ -2,18 +2,19 @@
 
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
-import { loadTokens, loadExchange, loadAccount, subscribeToEvents } from '../globalRedux/interactions'
+import { loadTokens, loadExchange, loadAccount, subscribeToEvents, loadAllOrders } from '../globalRedux/interactions'
 import configJson from '../../config.json';
 
 import { useAppDispatch, useAppSelector } from '../globalRedux/hooks';
 import {setProvider, setChainId, setAccount} from '../globalRedux/features/connectionSlice';
 import { setPair } from '../globalRedux/features/tokensSlice';
-import { setExchange, setTransferSuccess } from '../globalRedux/features/exchangeSlice';
+import { setExchange } from '../globalRedux/features/exchangeSlice';
 
 import Navbar from '../../components/Navbar'
 import Markets from '../../components/Markets'
 import Balance from '../../components/Balance'
 import Order from '../../components/Order'
+import OrderBook from '../../components/OrderBook'
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -68,7 +69,11 @@ export default function Home() {
         //Listen to events
         const {exchange} = await loadExchange(loadProvider, exchangeConfig.address)
         if (exchange) {
-          await subscribeToEvents(exchange, dispatch);
+          // Fetch all orders: open, filled, cancelled
+          loadAllOrders(loadProvider, exchange, dispatch)
+
+          //Listen to Events
+          subscribeToEvents(exchange, dispatch);
         }
 
       } else {
@@ -107,7 +112,7 @@ export default function Home() {
 
           {/* Trades */}
 
-          {/* OrderBook */}
+          <OrderBook />
 
         </section>
       </main>

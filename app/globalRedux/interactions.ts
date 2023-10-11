@@ -3,7 +3,7 @@ import TOKEN_ABI from '../../constants/abis/Token.json';
 import EXCHANGE_ABI from '../../constants/abis/Exchange.json';
 import { Dispatch } from '@reduxjs/toolkit'
 
-import { setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail } from './features/exchangeSlice';
+import { setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded } from './features/exchangeSlice';
 
 type LoadTokenResult = {
   token: any;
@@ -96,6 +96,30 @@ export const loadExchangeBalances = async (exchange: ethers.Contract, tokens: et
   return { exchange_token_1, exchange_token_2}
 }
 
+
+/// LOAD ALL ORDERS
+
+export const loadAllOrders = async (provider: ethers.providers.JsonRpcProvider, exchange: ethers.Contract, dispatch: Dispatch) => {
+  const block = await provider.getBlockNumber()
+
+  // Fetch canceled orders
+  const cancelStream = await exchange.queryFilter('Cancel', 0, block)
+  const cancelledOrders = cancelStream.map(event => event.args)
+
+  dispatch(cancelledOrdersLoaded(cancelledOrders))
+
+  // Fetch filled orders
+  const tradeStream = await exchange.queryFilter('Trade', 0, block)
+  const filledOrders = tradeStream.map(event => event.args)
+
+  dispatch(filledOrdersLoaded(filledOrders))
+
+  //Fetch all orders
+  const orderStream = await exchange.queryFilter('Order', 0, block)
+  const allOrders = orderStream.map(event => event.args)
+
+  dispatch(allOrdersLoaded(allOrders))
+}
 
 ///---------------------------------------------------------------------------------------
 /// Transfer tokens
