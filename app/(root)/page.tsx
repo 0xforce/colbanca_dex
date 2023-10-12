@@ -15,6 +15,7 @@ import Markets from '../../components/Markets'
 import Balance from '../../components/Balance'
 import Order from '../../components/Order'
 import PriceChart from '../../components/PriceChart'
+import Trades from '../../components/Trades'
 import OrderBook from '../../components/OrderBook'
 
 // Define a type for your configuration
@@ -111,7 +112,7 @@ export default function Home() {
 
           {/* Transactions */}
 
-          {/* Trades */}
+          <Trades />
 
           <OrderBook />
 
