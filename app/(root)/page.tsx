@@ -14,6 +14,7 @@ import Navbar from '../../components/Navbar'
 import Markets from '../../components/Markets'
 import Balance from '../../components/Balance'
 import Order from '../../components/Order'
+import PriceChart from '../../components/PriceChart'
 import OrderBook from '../../components/OrderBook'
 
 // Define a type for your configuration
@@ -106,7 +107,7 @@ export default function Home() {
         </section>
         <section className='exchange__section--right grid'>
 
-          {/* PriceChart */}
+          <PriceChart />
 
           {/* Transactions */}
 
