@@ -15,6 +15,7 @@ import Markets from '../../components/Markets'
 import Balance from '../../components/Balance'
 import Order from '../../components/Order'
 import PriceChart from '../../components/PriceChart'
+import Transactions from '../../components/Transactions'
 import Trades from '../../components/Trades'
 import OrderBook from '../../components/OrderBook'
 
@@ -110,7 +111,7 @@ export default function Home() {
 
           <PriceChart />
 
-          {/* Transactions */}
+          <Transactions />
 
           <Trades />
 
