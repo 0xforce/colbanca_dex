@@ -18,6 +18,7 @@ import PriceChart from '../../components/PriceChart'
 import Transactions from '../../components/Transactions'
 import Trades from '../../components/Trades'
 import OrderBook from '../../components/OrderBook'
+import Alert from '../../components/Alert'
 
 // Define a type for your configuration
 interface ChainConfig {
@@ -120,7 +121,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Alert */}
+      <Alert />
 
     </div>
   )

@@ -8,6 +8,7 @@ const RED = '#F45353'
 
 const tokens = state => get(state, 'tokensReducer.Pair.contracts');
 const account = state => get(state, 'connectionReducer.account.address');
+const events = state => get(state, 'exchangeReducer.events');
 
 const allOrders = state => get(state, 'exchangeReducer.allOrders.data', []);
 const cancelledOrders = state => get(state, 'exchangeReducer.cancelledOrders.data', []);
@@ -26,6 +27,19 @@ const openOrders = state => {
 
     return openOrders
 }
+
+// ---------------------------------------------------------------------------
+// My EVENTS
+
+export const myEventsSelector = createSelector(
+    account,
+    events,
+    (account, events) => {
+        events = events.filter((e) => e.args.user === account)
+        return events
+    }
+)
+
 
 // ---------------------------------------------------------------------------
 // My OPEN ORDERS

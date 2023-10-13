@@ -31,10 +31,8 @@ const Balance = () => {
     const loadBalance = async () => {
         const tokenBalances = await loadTokensBalances( tokens, account);
         dispatch(setTokensBalances(tokenBalances));
-        console.log(tokenBalances)
         const exchangeBalances = await loadExchangeBalances( exchange, tokens, account);
         dispatch(setExchangeBalances(exchangeBalances));
-        console.log(exchangeBalances)
     }
 
     const depositRef: RefObject<HTMLButtonElement>  = useRef(null)
@@ -96,7 +94,7 @@ const Balance = () => {
         if (exchange && account && tokens && tokens.length >= 2 && tokens[0]?.address && tokens[1]?.address) {
             loadBalance();
         }
-    }, [exchange, account, tokens, transferInProgress])
+    }, [exchange, account, tokens, transferInProgress, dispatch])
     
 
     return (
@@ -146,7 +144,7 @@ const Balance = () => {
           </div>
   
           <form onSubmit={isDeposit ? ((e) => depositHandler(e, tokens[1])) : ((e) => withdrawHandler(e, tokens[1]))}>
-            <label htmlFor="token1"></label>
+            <label htmlFor="token1">{symbols && symbols[1]} Amount</label>
             <input 
                 type="text" 
                 id='token1' 
