@@ -1,13 +1,26 @@
 import Image from 'next/image'
 import sort from '../public/assets/sort.svg'
 
-import { useAppSelector } from "@/app/globalRedux/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/globalRedux/hooks";
 
 import { orderBookSelector } from '../app/globalRedux/selectors'
+import { fillOrder } from '@/app/globalRedux/interactions';
+
 
 const OrderBook = () => {
+    const dispatch = useAppDispatch()
+
     const symbols = useAppSelector(state => state.tokensReducer.Pair.symbols)
+    const provider = useAppSelector(state => state.connectionReducer.provider)
+    const exchange = useAppSelector(state => state.exchangeReducer.exchange.contract)
+
     const orderBook = useAppSelector(orderBookSelector)
+
+    const fillOrderHandler = (order:any) => {
+      if(provider) {
+        fillOrder(provider, exchange, order, dispatch)
+      }
+    }
 
     return (
       <div className="component exchange__orderbook">
@@ -35,7 +48,7 @@ const OrderBook = () => {
 
                 {orderBook && orderBook.sellOrders.map((order: any, index: any) => {
                   return(
-                    <tr key={index}>
+                    <tr key={index} onClick={() => fillOrderHandler(order)}>
                       <td>{order.token0Amount}</td>
                       <td style={{color: `${order.orderTypeClass}`}}>{order.tokenPrice}</td>
                       <td>{order.token1Amount}</td>
@@ -66,7 +79,7 @@ const OrderBook = () => {
 
                 {orderBook && orderBook.buyOrders.map((order: any, index: any) => {
                   return(
-                    <tr key={index}>
+                    <tr key={index} onClick={() => fillOrderHandler(order)}>
                       <td>{order.token0Amount}</td>
                       <td style={{color: `${order.orderTypeClass}`}}>{order.tokenPrice}</td>
                       <td>{order.token1Amount}</td>

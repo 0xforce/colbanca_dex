@@ -20,11 +20,9 @@ interface ExchangeState {
     data: any[];
   };
   cancelledOrders: {
-    loaded: boolean;
     data: any[];
   };
   filledOrders: {
-    loaded: boolean;
     data: any[];
   };
   index: number;
@@ -42,11 +40,9 @@ const initialState: ExchangeState = {
       data: []
     },
     cancelledOrders: {
-      loaded: false, 
       data: []
     },
     filledOrders: {
-      loaded: false, 
       data: []
     },
     index: 0,
@@ -101,10 +97,10 @@ const exchangeSlice = createSlice({
       state.allOrders = {loaded: true, data: action.payload}
     },
     cancelledOrdersLoaded: (state, action) => {
-      state.cancelledOrders = {loaded: true, data: action.payload}
+      state.cancelledOrders = {data: action.payload}
     },
     filledOrdersLoaded: (state, action) => {
-      state.filledOrders = {loaded: true, data: action.payload}
+      state.filledOrders = {data: action.payload}
     },
     //----------------------------------------------------
     // Cancelling Orders
@@ -125,9 +121,35 @@ const exchangeSlice = createSlice({
     setOrderCancelFail: (state) => {
       state.transaction = {transactionType: 'Cancel', isPending: false, isSuccessful: false, isError: true};
     },
+    //----------------------------------------------------
+    // Filling Orders
+    setOrderFillRequest: (state) => {
+      state.transaction = {transactionType: 'Fill Order', isPending: true, isSuccessful: false};
+    },
+    setOrderFillSuccess: (state, action) => {
+      // Prevent duplicate orders
+      let index = state.filledOrders.data.findIndex((order) => order.id.toString() == action.payload.args.id.toString());
+      let data;
+
+      if(index === -1) {
+        data = [...state.filledOrders.data, action.payload.args]
+      } else {
+        data = state.filledOrders.data
+      }
+
+      state.transaction = {transactionType: 'Fill Order', isPending: false, isSuccessful: true};
+      state.filledOrders = {
+        ...state.filledOrders,
+        data
+      }
+      state.events = [action.payload, ...state.events];
+    },
+    setOrderFillFail: (state) => {
+      state.transaction = {transactionType: 'Fill Order', isPending: false, isSuccessful: false, isError: true};
+    },
   },
 });
 
-export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded, setOrderCancelRequest, setOrderCancelSuccess, setOrderCancelFail } = exchangeSlice.actions;
+export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded, setOrderCancelRequest, setOrderCancelSuccess, setOrderCancelFail, setOrderFillRequest, setOrderFillSuccess, setOrderFillFail } = exchangeSlice.actions;
 
 export default exchangeSlice.reducer;

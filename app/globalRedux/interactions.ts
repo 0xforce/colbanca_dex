@@ -3,7 +3,7 @@ import TOKEN_ABI from '../../constants/abis/Token.json';
 import EXCHANGE_ABI from '../../constants/abis/Exchange.json';
 import { Dispatch } from '@reduxjs/toolkit'
 
-import { setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded, setOrderCancelRequest, setOrderCancelFail, setOrderCancelSuccess } from './features/exchangeSlice';
+import { setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded, setOrderCancelRequest, setOrderCancelFail, setOrderCancelSuccess, setOrderFillRequest, setOrderFillFail, setOrderFillSuccess } from './features/exchangeSlice';
 
 type LoadTokenResult = {
   token: any;
@@ -75,6 +75,10 @@ export const subscribeToEvents = (exchange: ethers.Contract, dispatch: Dispatch)
 
   exchange.on('Cancel', (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
     dispatch(setOrderCancelSuccess(event))
+  })
+
+  exchange.on('Trade', (id, user, tokenGet, amountGet, tokenGive, amountGive, creator, timestamp, event) => {
+    dispatch(setOrderFillSuccess(event))
   })
 
   // Handle errors, if necessary
@@ -202,5 +206,21 @@ export const cancelOrder = async(provider: ethers.providers.JsonRpcProvider, exc
     
   } catch (error) {
     dispatch(setOrderCancelFail())
+  }
+}
+
+//-----------------------------------------------------------------------------------
+// FILL ORDER
+
+export const fillOrder = async (provider: ethers.providers.JsonRpcProvider, exchange: ethers.Contract, order: any, dispatch: Dispatch) => {
+  dispatch(setOrderFillRequest())
+
+  try {
+    const signer = await provider.getSigner()
+    const transaction = await exchange.connect(signer).fillOrder(order.id)
+    await transaction.wait()
+    
+  } catch (error) {
+    dispatch(setOrderFillFail())
   }
 }
