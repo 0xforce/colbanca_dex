@@ -106,9 +106,28 @@ const exchangeSlice = createSlice({
     filledOrdersLoaded: (state, action) => {
       state.filledOrders = {loaded: true, data: action.payload}
     },
+    //----------------------------------------------------
+    // Cancelling Orders
+    setOrderCancelRequest: (state) => {
+      state.transaction = {transactionType: 'Cancel', isPending: true, isSuccessful: false};
+    },
+    setOrderCancelSuccess: (state, action) => {
+      state.transaction = {transactionType: 'Cancel', isPending: false, isSuccessful: true};
+      state.cancelledOrders = {
+        ...state.cancelledOrders, 
+        data: [
+          ...state.cancelledOrders.data,
+          action.payload.args
+        ]
+      };
+      state.events = [action.payload, ...state.events];
+    },
+    setOrderCancelFail: (state) => {
+      state.transaction = {transactionType: 'Cancel', isPending: false, isSuccessful: false, isError: true};
+    },
   },
 });
 
-export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded } = exchangeSlice.actions;
+export const { setExchange, setExchangeBalances, setTransferRequest, setTransferSuccess, transferFail, setOrderRequest, setOrderSuccess, setOrderFail, allOrdersLoaded, cancelledOrdersLoaded, filledOrdersLoaded, setOrderCancelRequest, setOrderCancelSuccess, setOrderCancelFail } = exchangeSlice.actions;
 
 export default exchangeSlice.reducer;
