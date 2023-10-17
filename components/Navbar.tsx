@@ -51,7 +51,7 @@ function Navbar() {
                     <select name='networks' id='networks' value={(config as any)[chainId] ? `0x${chainId.toString()}` : '0'} onChange={networkHandler}>
                         <option value='0' disabled>Select Network</option>
                         <option value='0x7A69'>Localhost</option>
-                        <option value='0x5'>Goerli</option>
+                        <option value='0x11155111'>Sepolia</option>
                     </select>
                 )}
             </div>

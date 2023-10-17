@@ -14,19 +14,19 @@
         },
         "explorerURL": "#"
     },
-    "5": {
-        "explorerURL": "https://goerli.etherscan.io/" ,
+    "11155111": {
         "exchange": {
-            "address": ""
+            "address": "0xb1d3fCeA1D4F9649E72f28056A4864e463921D93"
         },
         "CBNK": {
-            "address": ""
+            "address": "0xC4332d1Af471CF61f46428894e74D8BA73F13413"
         },
         "mETH": {
-            "address": ""
+            "address": "0x9d7907F74450F3C273027499E421EDDd0113E273"
         },
         "mDAI": {
-            "address": ""
-        }
+            "address": "0x44B42161951FBE9eB0ADac8f5d31B53E430Ee3A4"
+        },
+        "explorerURL": "https://sepolia.etherscan.io/"
     }
 }
