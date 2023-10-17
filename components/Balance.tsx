@@ -1,5 +1,3 @@
-"use client"
-
 import Image from 'next/image'
 import dapp from '../public/assets/dapp.svg'
 import eth from '../public/assets/eth.svg'
