@@ -38,7 +38,7 @@ export default function Home() {
   const loadBlockchainData = async () => {
     try {
       // Ensure that MetaMask or a similar provider is available
-      if (window.ethereum) {
+      if (typeof window !== 'undefined' && window.ethereum) {
         
         //Connect ethers to blockchain
         const loadProvider = new ethers.providers.Web3Provider(window.ethereum);
