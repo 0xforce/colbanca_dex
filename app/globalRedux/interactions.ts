@@ -1,5 +1,3 @@
-"use client"
-
 import { ethers } from 'ethers';
 import TOKEN_ABI from '../../constants/abis/Token.json';
 import EXCHANGE_ABI from '../../constants/abis/Exchange.json';
