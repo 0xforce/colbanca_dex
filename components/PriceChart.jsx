@@ -1,6 +1,6 @@
+import dynamic from 'next/dynamic';
 import { useAppSelector } from "@/app/globalRedux/hooks";
 
-import Chart from 'react-apexcharts'
 import { options, defaultSeries } from './PriceChart.config';
 
 import { priceChartSelector } from '../app/globalRedux/selectors'
@@ -10,6 +10,8 @@ import Image from "next/image";
 
 import arrowDown from '../public/assets/down-arrow.svg'
 import arrowUp from '../public/assets/up-arrow.svg'
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 const PriceChart = () => {
     const account = useAppSelector(state => state.connectionReducer.account.address)
